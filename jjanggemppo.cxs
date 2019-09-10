@@ -1,0 +1,321 @@
+Import mojo
+Import mojo.app
+
+
+Class Game Extends App
+    Global po=0
+
+	Global ani:Image[3]	
+	Global imageCount:Int	
+	Global imageNumber:Int 
+	Global soundNumber:Int 
+	Global vsNumber:Int 
+	
+	Field soundFmt$
+	Global beep:Sound
+	Global GO:Sound
+	
+'===================================
+
+	Global as:Image
+    Global supdateCount
+    Global cou
+    Global coin
+    
+    Global gameOver:Image
+
+    Global mu:Sound
+	Global temp1=0
+	Global temp2=0
+    Global temp3=1
+'========================================	
+
+   Global insertCoinNum:Int
+   Global gameStart:Bool
+   Global coinSound:Sound
+  
+  
+'========================================
+   
+   Function Draw_start_page_bg()
+      Local w:Int=DeviceWidth/2
+      Local h:Int=DeviceHeight/2
+
+      '백그라운드 이미지 그리기
+      Local bgImage:Image=LoadImage("startpage_bg.png")
+      DrawImage(bgImage,w-250,h-150)
+      
+      '텍스트 삽입     
+      Local coinText:String="Inserted Coin : "+insertCoinNum
+ 
+      DrawText("Press Z to insert Coin",w,h+200)
+      DrawText(coinText,w,h+210)      
+      
+	End Function
+   
+   Function start_page:Int()
+      
+      '코인 삽입ㅇ재ㅜ
+      Local hitZ=KeyHit(KEY_Z)
+      Local hitSpace=KeyHit(KEY_SPACE)
+
+      '
+      If hitZ Then
+         PlaySound coinSound,0
+         Return 1
+      Elseif hitSpace And insertCoinNum>0 Then
+         gameStart=True
+         Return 0
+      Else
+         Return 0
+      Endif
+      
+   End Function
+	
+	
+	Function Condition()
+	If imageNumber = 0 And KeyDown(KEY_A) Then
+ 			vsNumber = 0 
+ 			
+		Else If imageNumber = 0 And KeyDown(KEY_S) Then
+     		vsNumber = 1
+     		
+  		Else If imageNumber = 0 And KeyDown(KEY_D) Then
+     		vsNumber = 2
+     	End If 	 '여기까지 주먹조건.
+     		
+     	If imageNumber = 1 And KeyDown(KEY_A) Then
+ 			vsNumber = 1
+ 			
+		Else If imageNumber = 1 And KeyDown(KEY_S) Then
+     		vsNumber = 2
+     		
+  		Else If imageNumber = 1 And KeyDown(KEY_D) Then 
+     		vsNumber = 0 
+     	End If '여기까지 가위조건.
+     		
+     	If imageNumber = 2 And KeyDown(KEY_A) Then  	
+ 			vsNumber = 2
+ 			
+		Else If imageNumber = 2 And KeyDown(KEY_S) Then 			
+     		vsNumber = 0 
+     		
+  		Else If imageNumber = 2 And KeyDown(KEY_D) Then 		 
+     		vsNumber = 1   
+     				
+     	End If '여기까지 보자기조건.
+     End
+     
+     Function vs()
+     	If vsNumber = 1 '이긴경우
+     		Cls
+ 			DrawImage ani[imageNumber],20,20
+     		Print "Win"
+     		po=1
+     		temp2=1
+     		vsNumber = -1
+     		temp3=1  		
+     		
+     	Else If vsNumber = 0 '비긴경우
+     		Cls
+ 			DrawImage ani[imageNumber],20,20
+     		Print "Draw"
+     		po=1
+     		If KeyDown(KEY_R) Then 
+     			po=0
+     			vsNumber = -1
+     		End 
+     		
+
+     	Else If vsNumber = 2 '진경우
+     		Cls
+ 			DrawImage ani[imageNumber],20,20
+     		Print "Lose"
+     		po=1
+     		If KeyDown(KEY_R) Then 
+     			po=0
+     			vsNumber = -1
+     			temp3=1
+     		End 
+     		
+     	Else vsNumber = -1
+     	    
+     	End If 
+     End
+     
+     Function DrawSpiral(clock) 'Win일 경우에만 실행.
+		Local w=DeviceWidth/4
+		For Local i#=0 Until w Step .2
+			Local x#,y#
+			x=i*Cos(clock)+210
+			y=i*Sin(clock)+210
+			DrawPoint x,y
+		Next
+	End
+	
+    Function Dr()
+    	Cls
+		DrawImage as,20,20
+		DrawSpiral supdateCount
+
+    End
+    	
+	Function sco(cou)
+		insertCoinNum+=cou
+		PlaySound mu,0
+		Print insertCoinNum
+		temp2=0
+		temp1=1
+		
+
+	End
+	
+	Function tun()
+	supdateCount+=1
+		If supdateCount=360
+		supdateCount=0
+		End
+		If supdateCount=0
+		cou=1
+		End
+		If supdateCount=45
+		cou=4
+		End
+		If supdateCount=90
+		cou=1
+		End
+		If supdateCount=135
+		cou=20
+		End
+		If supdateCount=180
+		cou=1
+		End
+	    If supdateCount=225
+		cou=2
+		End
+		If supdateCount=270
+		cou=1
+		End
+		If supdateCount=315
+		cou=7
+		End
+	End    	
+
+	Function ExitG()
+		If insertCoinNum<0
+		Cls
+			DrawImage gameOver,10,70
+			PlaySound GO
+			po=1
+			temp1=1
+			temp2=0
+	 	    temp3=0
+		End
+		
+	End
+	
+	Method OnCreate()
+
+	 soundFmt="mp3"
+
+     coinSound=LoadSound("oneCoin."+soundFmt)
+	 gameOver=LoadImage("youdied.jpg")
+      
+     insertCoinNum=0
+     gameStart=False
+      
+	 ani[0]=LoadImage("rock.png")
+	 ani[1]=LoadImage("sissor.png")
+	 ani[2]=LoadImage("paper.png")	 
+	 
+	 as=LoadImage("1564202627426.png")
+     mu=LoadSound("Coin.mp3")   
+     GO=LoadSound("Mariodies.mp3")
+    		SetUpdateRate 6000
+
+	 imageCount=0
+	 imageNumber=0
+	 soundNumber=0
+	 vsNumber=-1
+	  
+	 soundFmt="mp3"
+	 beep=LoadSound("beep."+soundFmt)	 
+	 
+	 End 'Oncreate End	
+
+	Method OnUpdate()
+	
+	If gameStart=False
+		insertCoinNum+=start_page()
+    End If
+
+	If gameStart=True
+	If po=0
+ 	 imageCount +=1
+ 	 If temp3 = 1
+ 		 insertCoinNum-=1
+ 		 temp3=0
+ 		 
+ 	 End 
+
+	 soundNumber = imageNumber
+ 	 If imageCount>5 Then '사진 넘어가는 속도 조절부분 
+ 	 	soundNumber = imageNumber
+		imageNumber+=1	  'count가 4이상이면 count 초기화 후 사진인덱스 +1 	    
+ 	    imageCount = 0
+ 	 End If 
+ 	 
+ 	 If imageNumber > 2 Or imageNumber = 3 Then '사진인덱스 수가 3이상이면
+ 	 	imageNumber = 0	      					'인덱스 넘버를 0으로 바꿔줌. 	 	
+	 End If 
+	 
+	 If imageCount = 4 Then 
+ 		PlaySound beep
+ 	 End If  	 
+ 	End 	
+ 	End If 
+ 	
+ 	If temp2=1
+	 		tun
+			If KeyHit(KEY_SPACE)
+				sco cou
+			End If 
+		End If 	 	
+	
+	End 'OnUpdate End
+
+	Method OnRender() 
+
+		If gameStart=false
+		 Cls
+      	 Draw_start_page_bg() 
+      	End If 
+		
+		If gameStart=True
+		If temp1=0
+			Cls
+						    
+			DrawImage ani[imageNumber],20,20
+			DrawText("Inserted Coin : "+insertCoinNum,400,400)
+			ExitG
+
+			Condition()
+ 			vs()
+ 		End 'temp1 조건문 끝.
+ 		
+ 		If temp2=1
+			Dr
+		End 		
+		If 	KeyDown(KEY_R)
+			po=0
+			temp1=0
+		End 
+		
+		End If 
+	End 'OnRender End
+
+End 'Class End
+
+Function Main()
+    New Game()
+End
